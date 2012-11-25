@@ -53,12 +53,12 @@
           <p>Share <a href="<%= @app.link %>"><%= @app.name %></a>:</p>
           <ul>
             <li>
-              <a href="#" class="facebook-button" onclick="popup('<%= post_to_wall_url %>', 'Post to Wall', 580, 400);">
+              <a href="#" class="facebook-button" onclick="popup('<%= post_to_wall_url '' %>', 'Post to Wall', 580, 400);">
                 <span class="plus">Post to Wall</span>
               </a>
             </li>
             <li>
-              <a href="#" class="facebook-button speech-bubble" onclick="popup('<%= send_to_friends_url %>', 'Send', 580, 400);">
+              <a href="#" class="facebook-button speech-bubble" onclick="popup('<%= send_to_friends_url '' %>', 'Send', 580, 400);">
                 <span class="speech-bubble">Send to Friends</span>
               </a>
             </li>

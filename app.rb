@@ -6,10 +6,12 @@ enable :sessions
 set :raise_errors, false
 set :show_exceptions, false
 
+DataMapper::Logger.new($stdout, :debug)
 DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/willdo.db")
 class Task
   include DataMapper::Resource
   property :id, Serial
+  property :username, Text, :required => true
   property :taskToComplete, Text, :required => true
   property :cashValue, Integer, :required => true
   property :charityname, Text, :required => true
@@ -17,7 +19,7 @@ class Task
   property :created_at, DateTime
   property :updated_at, DateTime
 end
-DataMapper.finalize.auto_upgrade!
+DataMapper.finalize.auto_migrate!
 
 # Scope defines what permissions that we are asking the user to grant.
 # In this example, we are asking for the ability to publish stories
@@ -57,12 +59,12 @@ helpers do
     base + path
   end
 
-  def post_to_wall_url
-    "https://www.facebook.com/dialog/feed?redirect_uri=#{url("/close")}&display=popup&app_id=#{@app.id}";
+  def post_to_wall_url(message)
+    "https://www.facebook.com/dialog/feed?message=#{message}&redirect_uri=#{url("/close")}&display=popup&app_id=#{@app.id}";
   end
 
-  def send_to_friends_url
-    "https://www.facebook.com/dialog/send?redirect_uri=#{url("/close")}&display=popup&app_id=#{@app.id}&link=#{url('/')}";
+  def send_to_friends_url(message)
+    "https://www.facebook.com/dialog/send?message=#{message}&redirect_uri=#{url("/close")}&display=popup&app_id=#{@app.id}&link=#{url('/')}";
   end
 
   def authenticator
@@ -108,20 +110,26 @@ end
 
 post '/create' do
   check_auth
-  t = Task.new
-  t.taskToComplete = params[:taskToComplete]
-  t.cashValue = params[:cashValue]
-  t.charityname = params[:charityname]
-  t.charityID = params[:charityID]
-  t.created_at = Time.now
-  t.updated_at = Time.now
-  t.save
-  @task = t
-  erb :donate
+  @task = Task.create(
+    :username => @user.name,
+    :taskToComplete => params[:taskToComplete],
+    :cashValue => params[:cashValue],
+    :charityname => params[:charityname],
+    :charityID => params[:charityID],
+    :created_at => Time.now,
+    :updated_at => Time.now
+  )
+  puts @task.id
+  @message = "I will #{@task.taskToComplete} if you will donate #{@task.cashValue.to_s} to #{@task.charityname} <a href=\"https://www.thegivinglab.org/api/donation/start?charityid=#{@task.charityID}&amount=#{@task.cashValue}&donationtype=0\">Accept Challenge and donate</a>!</a>"
+  erb :pledge
 end
 
 get '/:id' do
   check_auth
   @task = Task.get params[:id]
-  erb :donate
+  if @task
+    erb :donate
+  else
+    redirect '/'
+  end
 end

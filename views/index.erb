@@ -15,14 +15,13 @@
 <script>
   $(document).ready(function() {
 
-    $(  "#charityname"  ).autocomplete({
+    $("#charityname").autocomplete({
       dataType: "json",
       source: function(request, response) {
         $.getJSON("https://www.thegivinglab.org/api/charities/" + $("#charityname").val() + "?apikey=0b9fe55d-1c71-4b02-90c9-4fa670230c61&callback=?",function(data){
           var array = new Array();
           for(var i=0;i<data.length;i++) {
             array[array.length] = { data: data[i].CharityID, value: data[i].CharityName, result: data[i].CharityName };
-
           }
           response(array);
         });
@@ -30,8 +29,6 @@
       select: function(event, ui) {
 		$("#charityID").val(ui.item.data);
 		} 
-      
-
     });
   });
 
