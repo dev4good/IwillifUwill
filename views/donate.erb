@@ -1,2 +1,2 @@
 <p>"NAME" will <%= @task.taskToComplete %> if you will donate  <%= @task.cashValue.to_s %> to <%= @task.charityname %>.</p>
-<p><a class="btn btn-primary">Accept Challenge and donate</a></p>
+<p><a class="btn btn-primary" href="https://www.thegivinglab.org/api/donation/start?charityid=<%= @task.charityID %>&amount=<%= @task.cashValue %>&donationtype=0">Accept Challenge and donate</a></p>
