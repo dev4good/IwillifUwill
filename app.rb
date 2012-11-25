@@ -37,19 +37,21 @@ before do
   if settings.environment == :production && request.scheme != 'https'
     redirect "https://#{request.env['HTTP_HOST']}"
   end
-
-  # Facebook authentication
-  redirect "/auth/facebook" unless session[:at]
-  @client = Mogli::Client.new(session[:at])
-
-  # limit queries to 15 results
-  @client.default_params[:limit] = 15
-
-  @app  = Mogli::Application.find(ENV["FACEBOOK_APP_ID"], @client)
-  @user = Mogli::User.find("me", @client)
 end
 
 helpers do
+  def check_auth
+    # Facebook authentication
+    redirect "/auth/facebook" unless session[:at]
+    @client = Mogli::Client.new(session[:at])
+
+    # limit queries to 15 results
+    @client.default_params[:limit] = 15
+
+    @app  = Mogli::Application.find(ENV["FACEBOOK_APP_ID"], @client)
+    @user = Mogli::User.find("me", @client)
+  end
+
   def url(path)
     base = "#{request.scheme}://#{request.env['HTTP_HOST']}"
     base + path
@@ -79,6 +81,7 @@ error(Mogli::Client::HTTPException) do
 end
 
 get "/" do
+  check_auth
   erb :index
 end
 
@@ -104,7 +107,7 @@ get '/auth/facebook/callback' do
 end
 
 post '/create' do
-  puts 'creating task'
+  check_auth
   t = Task.new
   t.taskToComplete = params[:taskToComplete]
   t.cashValue = params[:cashValue]
@@ -114,11 +117,11 @@ post '/create' do
   t.updated_at = Time.now
   t.save
   @task = t
-  puts @task
   erb :donate
 end
 
 get '/:id' do
+  check_auth
   @task = Task.get params[:id]
   erb :donate
 end
