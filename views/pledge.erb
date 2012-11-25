@@ -1,0 +1,47 @@
+<div id='fb-root'></div>
+<script src='http://connect.facebook.net/en_US/all.js'></script>
+
+<script> 
+  FB.init({appId: "<%= @app.id %>", status: true, cookie: true});
+
+  function postToFeed() {
+
+    // calling the API ...
+    var obj = {
+      method: 'feed',
+      redirect_uri: '<%= url "/" %>',
+      link: '<%= url "/#{@task.id}" %>',
+      picture: 'http://fbrell.com/f8.jpg',
+      name: 'I will if U will',
+      caption: 'My charity pledge:',
+      description: '<%= @message %>'
+    };
+
+    function callback(response) {
+      document.getElementById('msg').innerHTML = "Post ID: " + response['post_id'];
+    }
+
+    FB.ui(obj, callback);
+  }
+
+  function sendToFriend() {
+    FB.ui({
+      method: 'send',
+      redirect_uri: '<%= url "/" %>',
+      link: '<%= url "/#{@task.id}" %>',
+      picture: 'http://fbrell.com/f8.jpg',
+      name: 'I will if U will',
+      description: 'My charity pledge: <%= @message %>'
+    });
+  }
+</script>
+<p>You will <%= @task.taskToComplete %> if one of your friends will donate <%= @task.cashValue.to_s %> to <%= @task.charityname %>.</p>
+<p>
+  <a href="#" class="facebook-button" onclick="postToFeed(); return false;">
+    <span class="plus">Post to Wall</span>
+  </a>
+  <a href="#" class="facebook-button speech-bubble" onclick="sendToFriend(); return false;">
+    <span class="speech-bubble">Send to Friends</span>
+  </a>
+</p>
+<p id='msg'></p>
