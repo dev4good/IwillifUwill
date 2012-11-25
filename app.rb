@@ -7,7 +7,11 @@ set :raise_errors, false
 set :show_exceptions, false
 
 DataMapper::Logger.new($stdout, :debug)
-DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/willdo.db")
+if settings.environment == :production and ENV["HEROKU_POSTGRESQL_PINK_URL"]
+  DataMapper::setup(:default, ENV["HEROKU_POSTGRESQL_PINK_URL"])
+else
+  DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/willdo.db")
+end
 class Task
   include DataMapper::Resource
   property :id, Serial
